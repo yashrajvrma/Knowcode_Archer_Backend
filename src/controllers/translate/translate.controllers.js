@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  // apiKey: process.env.OPENAI_API_KEY,
 });
 
 const speechFile = path.resolve("./speech.mp3");
@@ -15,7 +15,7 @@ const speechFile = path.resolve("./speech.mp3");
 const mp3 = await openai.audio.speech.create({
   model: "tts-1",
   voice: "alloy",
-  input: "Today is a wonderful day to build something people love!",
+  input: "Today! is a wonderful day to drink to tea",
 });
 
 const buffer = Buffer.from(await mp3.arrayBuffer());
