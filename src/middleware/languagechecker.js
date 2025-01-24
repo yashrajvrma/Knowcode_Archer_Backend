@@ -1,22 +1,20 @@
-import express from "express";
-const bodyParser = require("body-parser");
+import bodyParser from "body-parser";
 const { Translate } = require("@google-cloud/translate").v2;
 
-const app = express();
 app.use(bodyParser.json());
 
 const translate = new Translate();
 
 app.use(async (req, res, next) => {
   try {
-    const { text, targetLanguage } = req.body;
+    const { text, sourceLanguage } = req.query;
 
-    if (!text || !targetLanguage) {
+    if (!text || !sourceLanguage) {
       return res
         .status(400)
-        .json({ error: "text and targetLanguage are required" });
+        .json({ error: "text and sourceLanguage are required" });
     }
-    const [translation] = await translate.translate(text, targetLanguage);
+    const [translation] = await translate.translate(text, sourceLanguage);
     req.translatedText = translation;
 
     next();
