@@ -1,0 +1,24 @@
+import langdetect  from 'cld';
+
+app.use((req, res, next) => {
+  try {
+    const { text, sourceLanguage } = req.body;
+
+    if (!text || !sourceLanguage) {
+      return res.status(400).json({ error: 'Text and statedLanguage are required' });
+    }
+
+    const detectedLanguage = langdetect(text); 
+
+    if (detectedLanguage !== sourceLanguage) {
+      return res.status(400).json({
+        error: The text appears to be in '${detectedLanguage}' but you stated '${sourceLanguage}'.
+      });
+    }
+
+    req.detectedLanguage = detectedLanguage;
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Language detection failed', details: error.message });
+  }
+});
