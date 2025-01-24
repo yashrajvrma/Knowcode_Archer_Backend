@@ -1,31 +1,36 @@
-import bodyParser from "body-parser";
-const { Translate } = require("@google-cloud/translate").v2;
+import cld3 from "cld3-asm";
 
-app.use(bodyParser.json());
-
-const translate = new Translate();
-
-app.use(async (req, res, next) => {
+export const languageChecker = async (req, res, next) => {
   try {
-    const { text, sourceLanguage } = req.query;
+    const { text, sourceLang } = req.query;
 
-    if (!text || !sourceLanguage) {
+    if (!text || !sourceLang) {
       return res
         .status(400)
-        .json({ error: "text and sourceLanguage are required" });
+        .json({ error: "Text and sourceLang are required" });
     }
-    const [translation] = await translate.translate(text, sourceLanguage);
-    req.translatedText = translation;
 
+    // Detect language
+    const result = await cld3.getLanguages(text);
+
+    if (!result || result.length === 0) {
+      return res.status(400).json({ error: "Unable to detect language" });
+    }
+
+    const detectedLanguage = result[0].language; // The most likely detected language
+
+    if (detectedLanguage !== sourceLang) {
+      return res.status(400).json({
+        error: `The text appears to be in '${detectedLanguage}' but you stated '${sourceLang}'.`,
+      });
+    }
+
+    // Pass detected language to the next middleware
+    req.detectedLanguage = detectedLanguage;
     next();
   } catch (error) {
     res
       .status(500)
-      .json({ error: "Translation failed", details: error.message });
+      .json({ error: "Language detection failed", details: error.message });
   }
-});
-
-app.post("/translate", (req, res) => {
-  // Send the translated text as a response
-  res.json({ originalText: req.body.text, translatedText: req.translatedText });
-});
+};

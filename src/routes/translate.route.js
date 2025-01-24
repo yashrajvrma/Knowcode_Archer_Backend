@@ -1,10 +1,9 @@
 import express from "express";
-import { translateLang } from "../controllers/translate/translate.controllers.js";
-import { translateText } from "../middleware/translateText.js";
+import { textTranslateAndConvertIntoSpeech } from "../controllers/translate/translate.controllers.js";
+import { languageChecker } from "../middleware/languagechecker.js";
 
 const router = express.Router();
 
-// router.route("/translate-lang").get(translateLang);
-router.route("/translate-lang").get(translateText);
+router.route("/translate-lang").get(textTranslateAndConvertIntoSpeech);
 
 export default router;
