@@ -1,6 +1,6 @@
 import express from "express";
 import { textTranslateAndConvertIntoSpeech } from "../controllers/translate/translate.controllers.js";
-import { languageChecker } from "../middleware/languagechecker.js";
+// import { languageChecker } from "../middleware/languagechecker.js";
 
 const router = express.Router();
 

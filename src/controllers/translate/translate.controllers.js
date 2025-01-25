@@ -93,11 +93,11 @@ export const textTranslateAndConvertIntoSpeech = async (req, res) => {
       messages: [
         {
           role: "system",
-          content: `You are a language translator expert. Translate the given text into ${targetLang} with maximum accuracy.`,
+          content: `You are a language translator expert. Translate the given text into ${targetLang} with maximum accuracy. Only give me the translated text and nothing else`,
         },
         {
           role: "user",
-          content: `Translate this text into ${targetLang}: "${text}"`,
+          content: `Translate this ${text} into ${targetLang}`,
         },
       ],
     });

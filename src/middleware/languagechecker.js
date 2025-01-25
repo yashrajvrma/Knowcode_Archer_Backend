@@ -1,36 +1,39 @@
-import cld3 from "cld3-asm";
+import LanguageDetect from "languagedetect";
+const lngDetector = new LanguageDetect();
 
-export const languageChecker = async (req, res, next) => {
+export const languageChecker = (req, res, next) => {
   try {
-    const { text, sourceLang } = req.query;
+    const { text, sourceLang } = req.body;
 
     if (!text || !sourceLang) {
       return res
         .status(400)
-        .json({ error: "Text and sourceLang are required" });
+        .json({ error: "Text and stated language are required." });
     }
 
-    // Detect language
-    const result = await cld3.getLanguages(text);
-
-    if (!result || result.length === 0) {
-      return res.status(400).json({ error: "Unable to detect language" });
+    const detectedLanguages = lngDetector.detect(text, 1);
+    if (detectedLanguages.length === 0) {
+      return res.status(400).json({ error: "Unable to detect the language." });
     }
 
-    const detectedLanguage = result[0].language; // The most likely detected language
+    const [detectedLanguage, maxProbability] = detectedLanguages[0];
 
-    if (detectedLanguage !== sourceLang) {
+    if (sourceLang.toLowerCase() === detectedLanguage.toLowerCase()) {
+      console.log(
+        `Language matched: ${detectedLanguage} (Probability: ${maxProbability})`
+      );
+      return next();
+    } else {
+      console.log(
+        `Mismatch: Stated (${sourceLang}) vs Detected (${detectedLanguage})`
+      );
       return res.status(400).json({
-        error: `The text appears to be in '${detectedLanguage}' but you stated '${sourceLang}'.`,
+        error:
+          "Stated language does not match detected language, Please give the correct language",
       });
     }
-
-    // Pass detected language to the next middleware
-    req.detectedLanguage = detectedLanguage;
-    next();
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Language detection failed", details: error.message });
+    console.error("Error in language middleware:", error);
+    return res.status(500).json({ error: "Internal server error." });
   }
 };
